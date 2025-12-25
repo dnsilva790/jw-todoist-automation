@@ -1,0 +1,37 @@
+name: JW.ORG Scraper
+
+on:
+  schedule:
+    # Executa todo dia às 9h e 18h (horário Brasília: 6h e 15h UTC)
+    - cron: '0 6,15 * * *'
+  workflow_dispatch:  # Permite execução manual
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+      
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Instalar dependências
+      run: |
+        pip install requests
+        
+    - name: Executar scraper
+      env:
+        TODOIST_TOKEN: ${{ secrets.TODOIST_TOKEN }}
+      run: python scraper.py
+      
+    - name: Commitar estado atualizado
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git add state.json
+        git diff --quiet && git diff --staged --quiet || git commit -m "Atualizar estado do scraper"
+        git push
