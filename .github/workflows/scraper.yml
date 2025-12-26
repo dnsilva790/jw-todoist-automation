@@ -21,7 +21,8 @@ jobs:
         
     - name: Instalar dependências
       run: |
-        pip install requests
+        pip install requests beautifulsoup4 lxml
+
         
     - name: Executar scraper
       env:
