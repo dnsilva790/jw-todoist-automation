@@ -1,0 +1,43 @@
+name: JW.org Vídeos Scraper
+
+on:
+  schedule:
+    # 09:00 horário de Brasília (13:00 UTC) - segunda a sexta
+    - cron: "0 13 * * 1-5"
+
+    # 18:00 horário de Brasília (22:00 UTC) - todos os dias
+    - cron: "0 22 * * *"
+
+  # Permite executar manualmente
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: |
+          pip install requests
+
+      - name: Executar scraper de vídeos
+        env:
+          TODOIST_TOKEN: ${{ secrets.TODOIST_TOKEN }}
+        run: python scraper.py
+
+      - name: Fazer commit de mudanças
+        if: always()
+        run: |
+          git config user.name "JW Scraper Bot"
+          git config user.email "bot@jworg-scraper.local"
+          git add -A
+          git commit -m "🎬 JW Videos - $(date '+%Y-%m-%d %H:%M:%S')" || true
+          git push || true
